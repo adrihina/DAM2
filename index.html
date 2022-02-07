@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Juego de Steam</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script type="text/javascript">
+
+        //funcion getGame()
+        //sin parametros de entrada
+        //Recibe de la API la informacion del juego solicitada, este elige solo los elementos seleccionado
+        //Devuelve en la pagina web HTML el nombre externo, el ID, el precio y una imagen o un error en caso contrario
+
+        function getGame() {
+            var strBusquedaJuego = document.getElementById('strBusquedaJuego').value;
+            axios
+                .get("https://www.cheapshark.com/api/1.0/games?title=" + strBusquedaJuego + "&limit=1")
+                .then(response => {
+                    console.log(response.data);
+                    document.getElementById('external').value = response.data[0].external;
+                    document.getElementById('gameID').value = response.data[0].gameID;
+                    document.getElementById('cheapest').value = response.data[0].cheapest;
+                    document.getElementById('thumb').src = response.data[0].thumb;
+                    document.getElementById('thumb').style.display = "block";
+                })
+                .catch(error => {
+                    console.error(error);
+                    document.getElementById('external').value = "ERROR EN LA CONSULTA: " + error;
+                    document.getElementById('thumb').style.display = "none";
+                });
+        }</script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript">
+
+        //funcion guardarInfo()
+        //no recibe parametros de entrada
+        //guarda los parametros de getGame en variables para luego pasarselas al servidor por el archivo PHP
+        //Devuelve una alerta como que se ha realizado la accion satisfactoriamente o un error en caso contrario
+
+        function guardarInfo() {
+            var gameID = document.getElementById('gameID').value;
+            var cheapest = document.getElementById('cheapest').value;
+            var external = document.getElementById('external').value;
+            var thumb = document.getElementById('thumb').src;
+            $.ajax({
+                type: "POST",
+                url: "configServidor.php",
+                data: { gameID: gameID, cheapest: cheapest, external: external, thumb: thumb },
+                success: function (response) {
+                    alert(response);
+                },
+                error: function () {
+                    alert("Error");
+                }
+            });
+        }
+    </script>
+
+</head>
+<body>
+    <h1>Juego de Steam</h1>
+    <p>Titulo del juego:</p>
+    <p>
+        <input type="text" value="" id="strBusquedaJuego">
+        <button id="botonBusquedaGrupo" onclick="getGame()">Buscar</button>
+    </p>
+    <img id="thumb" src="" height="300" style="display:none;" />
+    <p>Datos del juego:</p>
+    <p>Titulo del juego:</p>
+    <textarea id="external" rows="5" wid></textarea>
+    <p>ID del juego:</p>
+    <textarea id="gameID" rows="2"></textarea>
+    <p>Precio del juego:</p>
+    <textarea id="cheapest" rows="2"></textarea>
+    <p>
+        <button id="botonGuardar" onclick="guardarInfo()">Guardar</button>
+    </p>
+</body>
+</html>
